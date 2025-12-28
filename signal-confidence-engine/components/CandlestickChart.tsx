@@ -1,10 +1,10 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { simpleMovingAverage, rsi } from "@/lib/indicators";
+import { maCrossoverSignals } from "@/lib/signals";
 
-const Plot = dynamic(() => import("react-plotly.js"), {
-  ssr: false,
-});
+const Plot = dynamic(() => import("react-plotly.js"), { ssr: false });
 
 type Bar = {
   date: string;
@@ -21,6 +21,14 @@ type Props = {
 };
 
 export default function CandlestickChart({ symbol, bars }: Props) {
+  const closes = bars.map((b) => b.close);
+
+  const sma50 = simpleMovingAverage(closes, 50);
+  const sma200 = simpleMovingAverage(closes, 200);
+  const rsi14 = rsi(closes, 14);
+
+  const signals = maCrossoverSignals(sma50, sma200);
+
   return (
     <Plot
       data={[
@@ -31,16 +39,56 @@ export default function CandlestickChart({ symbol, bars }: Props) {
           low: bars.map((b) => b.low),
           close: bars.map((b) => b.close),
           type: "candlestick",
-          increasing: { line: { color: "#16a34a" } },
-          decreasing: { line: { color: "#dc2626" } },
+          name: "Price",
+        },
+        {
+          x: bars.map((b) => b.date),
+          y: sma50,
+          type: "scatter",
+          mode: "lines",
+          name: "SMA 50",
+          line: { color: "#2563eb" },
+        },
+        {
+          x: bars.map((b) => b.date),
+          y: sma200,
+          type: "scatter" as const,
+          mode: "lines",
+          name: "SMA 200",
+          line: { color: "#7c3aed" },
+        },
+        {
+          x: signals.map((s) => bars[s.index].date),
+          y: signals.map((s) => bars[s.index].close),
+          mode: "markers",
+          marker: {
+            size: 10,
+            color: signals.map((s) => (s.type === "BUY" ? "green" : "red")),
+          },
+          name: "Signals",
+        },
+        {
+          x: bars.map((b) => b.date),
+          y: rsi14,
+          yaxis: "y2",
+          type: "scatter",
+          mode: "lines",
+          name: "RSI (14)",
+          line: { color: "#f59e0b" },
         },
       ]}
       layout={{
-        title: { text: `${symbol} — Candlestick Chart` },
+        title: { text: `${symbol} — Price, MA & RSI` },
         xaxis: { rangeslider: { visible: false } },
-        yaxis: { fixedrange: false },
-        height: 520,
-        margin: { t: 50, l: 50, r: 30, b: 40 },
+        yaxis: { title: { text: "Price" } },
+        yaxis2: {
+            title: { text: "RSI" },
+            overlaying: "y",
+            side: "right",
+            range: [0, 100],
+            },
+        height: 620,
+        margin: { t: 50, l: 50, r: 50, b: 40 },
       }}
       style={{ width: "100%" }}
       config={{ responsive: true }}
