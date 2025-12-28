@@ -1,36 +1,89 @@
-// src/app/page.tsx
+"use client";
+
+import { useState } from "react";
+import CandlestickChart from "@/components/CandlestickChart";
+
+type Bar = {
+  date: string;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+};
+
 export default function Home() {
+  const [symbol, setSymbol] = useState("AAPL");
+  const [bars, setBars] = useState<Bar[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function loadData() {
+    setLoading(true);
+    setError(null);
+    setBars([]);
+
+    try {
+      const resp = await fetch(`/api/prices?symbol=${symbol}&interval=d`);
+      const data = await resp.json();
+
+      if (!data.ok) {
+        throw new Error(data.error || "Failed to load data");
+      }
+
+      setBars(data.bars);
+    } catch (err: any) {
+      setError(err.message || "Unknown error");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <main style={{ padding: 24, fontFamily: "system-ui, Arial" }}>
-      <h1 style={{ fontSize: 24, fontWeight: 700 }}>Signal Confidence Engine</h1>
-      <p style={{ marginTop: 8 }}>
-        Milestone 1: Data API is live. Test it here:
-      </p>
+      <h1 style={{ fontSize: 24, fontWeight: 700 }}>
+        Signal Confidence Engine
+      </h1>
 
-      <ol style={{ marginTop: 12, lineHeight: 1.8 }}>
-        <li>
-          AAPL daily:{" "}
-          <a href="/api/prices?symbol=AAPL&interval=d" target="_blank" rel="noreferrer">
-            /api/prices?symbol=AAPL&interval=d
-          </a>
-        </li>
-        <li>
-          SPY daily:{" "}
-          <a href="/api/prices?symbol=SPY&interval=d" target="_blank" rel="noreferrer">
-            /api/prices?symbol=SPY&interval=d
-          </a>
-        </li>
-        <li>
-          NVDA weekly:{" "}
-          <a href="/api/prices?symbol=NVDA&interval=w" target="_blank" rel="noreferrer">
-            /api/prices?symbol=NVDA&interval=w
-          </a>
-        </li>
-      </ol>
+      <div style={{ marginTop: 16, display: "flex", gap: 8 }}>
+        <input
+          value={symbol}
+          onChange={(e) => setSymbol(e.target.value.toUpperCase())}
+          placeholder="Ticker (e.g. AAPL)"
+          style={{
+            padding: 8,
+            border: "1px solid #ccc",
+            borderRadius: 4,
+            width: 160,
+          }}
+        />
+        <button
+          onClick={loadData}
+          disabled={loading}
+          style={{
+            padding: "8px 16px",
+            borderRadius: 4,
+            border: "none",
+            background: "#2563eb",
+            color: "white",
+            cursor: "pointer",
+          }}
+        >
+          {loading ? "Loading..." : "Load"}
+        </button>
+      </div>
 
-      <p style={{ marginTop: 16, color: "#555" }}>
-        Next milestone: chart + technical signals + confidence scoring.
-      </p>
+      {error && (
+        <p style={{ marginTop: 12, color: "red" }}>
+          Error: {error}
+        </p>
+      )}
+
+      {bars.length > 0 && (
+        <div style={{ marginTop: 24 }}>
+          <CandlestickChart symbol={symbol} bars={bars} />
+        </div>
+      )}
     </main>
   );
 }
