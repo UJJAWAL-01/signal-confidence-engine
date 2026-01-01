@@ -17,6 +17,8 @@ export default function Home() {
   const [bars, setBars] = useState<Bar[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [interval, setInterval] = useState<"d" | "w" | "m">("d");
+
 
   async function loadData() {
     setLoading(true);
@@ -24,7 +26,7 @@ export default function Home() {
     setBars([]);
 
     try {
-      const resp = await fetch(`/api/prices?symbol=${symbol}&interval=d`);
+      const resp = await fetch(`/api/prices?symbol=${symbol}&interval=${interval}`);
       const data = await resp.json();
 
       if (!data.ok) {
@@ -57,6 +59,25 @@ export default function Home() {
             width: 160,
           }}
         />
+        <select
+          value={interval}
+          onChange={(e) => setInterval(e.target.value as any)}
+          className="border px-2 py-1 rounded text-black"
+          style={{
+            padding: "8px 16px",
+            borderRadius: 4,
+            border: "none",
+            background: "#2563eb",
+            color: "white",
+            cursor: "pointer",
+          }}
+        >
+          <option value="d">Daily</option>
+          <option value="w">Weekly</option>
+          <option value="m">Monthly</option>
+          
+        </select>
+
         <button
           onClick={loadData}
           disabled={loading}

@@ -3,11 +3,13 @@
 import dynamic from "next/dynamic";
 import { simpleMovingAverage, rsi } from "@/lib/indicators";
 import { maCrossoverSignals } from "@/lib/signals";
+import { computeConfidence } from "@/lib/confidenceEngine";
+
 
 const Plot = dynamic(() => import("react-plotly.js"), { ssr: false });
 
 type Bar = {
-  date: string;
+  date: string; 
   open: number;
   high: number;
   low: number;
@@ -26,6 +28,25 @@ export default function CandlestickChart({ symbol, bars }: Props) {
   const sma50 = simpleMovingAverage(closes, 50);
   const sma200 = simpleMovingAverage(closes, 200);
   const rsi14 = rsi(closes, 14);
+  const sma50Clean = sma50.filter((v) => v != null);
+  const sma200Clean = sma200.filter((v) => v != null);
+
+
+
+  const confidence = computeConfidence({
+    bars,
+    sma50, 
+    sma200,
+    rsi14,
+  });
+
+  console.log("BARS:", bars.length);
+  console.log("LAST SMA50:", sma50[bars.length - 1]);
+  console.log("LAST SMA200:", sma200[bars.length - 1]);
+  console.log("LAST RSI14:", rsi14[bars.length - 1]);
+
+
+  console.log("CONFIDENCE:", symbol, confidence);
 
   const signals = maCrossoverSignals(sma50, sma200);
 
@@ -43,7 +64,7 @@ export default function CandlestickChart({ symbol, bars }: Props) {
         },
         {
           x: bars.map((b) => b.date),
-          y: sma50,
+          y: sma50Clean,
           type: "scatter",
           mode: "lines",
           name: "SMA 50",
@@ -51,7 +72,7 @@ export default function CandlestickChart({ symbol, bars }: Props) {
         },
         {
           x: bars.map((b) => b.date),
-          y: sma200,
+          y: sma200Clean,
           type: "scatter" as const,
           mode: "lines",
           name: "SMA 200",
@@ -77,6 +98,7 @@ export default function CandlestickChart({ symbol, bars }: Props) {
           line: { color: "#f59e0b" },
         },
       ]}
+      
       layout={{
         title: { text: `${symbol} — Price, MA & RSI` },
         xaxis: { rangeslider: { visible: false } },
