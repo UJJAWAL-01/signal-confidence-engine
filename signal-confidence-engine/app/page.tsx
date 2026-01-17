@@ -3,18 +3,9 @@
 import { useState } from "react";
 import CandlestickChart from "@/components/CandlestickChart";
 
-type Bar = {
-  date: string;
-  open: number;
-  high: number;
-  low: number;
-  close: number;
-  volume: number;
-};
-
 export default function Home() {
   const [symbol, setSymbol] = useState("AAPL");
-  const [bars, setBars] = useState<Bar[]>([]);
+  const [bars, setBars] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [interval, setInterval] = useState<"d" | "w" | "m">("d");
@@ -41,67 +32,58 @@ export default function Home() {
     }
   }
 
+   function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "Enter") {
+      loadData();
+    }
+  }
+
   return (
-    <main style={{ padding: 24, fontFamily: "system-ui, Arial" }}>
-      <h1 style={{ fontSize: 24, fontWeight: 700 }}>
-        Signal Confidence Engine
-      </h1>
+    <main className="min-h-screen bg-gray-100 p-4 md:p-6">
+      {/* Header */}
+      <div className="max-w-6xl mx-auto mb-6">
+        <h1 className="text-2xl md:text-3xl font-bold text-black mb-4">
+          Signal Confidence Engine
+        </h1>
 
-      <div style={{ marginTop: 16, display: "flex", gap: 8 }}>
-        <input
-          value={symbol}
-          onChange={(e) => setSymbol(e.target.value.toUpperCase())}
-          placeholder="Ticker (e.g. AAPL)"
-          style={{
-            padding: 8,
-            border: "1px solid #ccc",
-            borderRadius: 4,
-            width: 160,
-          }}
-        />
-        <select
-          value={interval}
-          onChange={(e) => setInterval(e.target.value as any)}
-          className="border px-2 py-1 rounded text-black"
-          style={{
-            padding: "8px 16px",
-            borderRadius: 4,
-            border: "none",
-            background: "#2563eb",
-            color: "white",
-            cursor: "pointer",
-          }}
-        >
-          <option value="d">Daily</option>
-          <option value="w">Weekly</option>
-          <option value="m">Monthly</option>
-          
-        </select>
+        {/* Controls */}
+        <div className="bg-white rounded-xl shadow-md p-4">
+          <div className="flex flex-col md:flex-row gap-3 md:items-center">
+            {/* Ticker */}
+            <input
+              value={symbol}
+              onChange={(e) => setSymbol(e.target.value.toUpperCase())}
+              onKeyDown={handleKeyDown}
+              placeholder="Ticker (e.g. AAPL)"
+              className="flex-1 px-4 py-2 border rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
 
-        <button
-          onClick={loadData}
-          disabled={loading}
-          style={{
-            padding: "8px 16px",
-            borderRadius: 4,
-            border: "none",
-            background: "#2563eb",
-            color: "white",
-            cursor: "pointer",
-          }}
-        >
-          {loading ? "Loading..." : "Load"}
-        </button>
+            {/* Timeframe */}
+            <select
+              value={interval}
+              onChange={(e) => setInterval(e.target.value as any)}
+              className="px-4 py-2 rounded-lg border text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="d">Daily</option>
+              <option value="w">Weekly</option>
+              <option value="m">Monthly</option>
+            </select>
+
+            {/* Load Button */}
+            <button
+              onClick={loadData}
+              disabled={loading}
+              className="px-6 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition disabled:opacity-50"
+            >
+              {loading ? "Loading..." : "Load"}
+            </button>
+          </div>
+        </div>
       </div>
 
-      {error && (
-        <p style={{ marginTop: 12, color: "red" }}>
-          Error: {error}
-        </p>
-      )}
-
+      {/* Chart Section */}
       {bars.length > 0 && (
-        <div style={{ marginTop: 24 }}>
+        <div className="max-w-6xl mx-auto">
           <CandlestickChart symbol={symbol} bars={bars} />
         </div>
       )}
