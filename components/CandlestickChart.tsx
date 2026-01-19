@@ -74,32 +74,27 @@ export default function CandlestickChart({
   const confluence = computeConfluence(daily, daily);
 
   return (
-    <div className="space-y-8">
-      {/* HOW THIS WORKS */}
-      <div className="bg-blue-50 border border-blue-200 p-4 rounded text-sm text-gray-700">
-        <h3 className="font-semibold text-blue-800 mb-1">
-          How this signal engine works
-        </h3>
-        <ul className="list-disc ml-5 space-y-1">
-          <li>
-            The selected timeframe controls the <b>main chart</b> and the
-            <b> Daily Signal</b>.
-          </li>
-          <li>
-            Weekly confirmation always uses <b>weekly candles</b> to filter
-            noise.
-          </li>
-          <li>
-            The Final Confluence Score combines both to reduce false signals.
-          </li>
-          <li>
-            When multiple timeframes align, confidence scores may look similar —
-            this indicates strong agreement.
-          </li>
-        </ul>
-      </div>
+    <div className="space-y-10">
+
+    {/* EXPLAINER */}
+    <div className="bg-blue-50 border border-blue-200 rounded-xl p-5">
+      <h3 className="font-semibold text-blue-900 mb-2">
+        How to read this signal
+      </h3>
+      <ul className="list-disc ml-5 text-sm text-blue-800 space-y-1">
+        <li>Main chart reflects the selected timeframe</li>
+        <li>Weekly trend acts as a higher-timeframe filter</li>
+        <li>Final score blends Daily (60%) and Weekly (40%)</li>
+        <li>Aligned scores indicate strong multi-timeframe agreement</li>
+      </ul>
+    </div>
 
       {/* PRICE CHART */}
+    <div className="bg-white/80 backdrop-blur border border-gray-200 rounded-xl shadow-sm p-4">
+      <h3 className="text-lg font-semibold text-gray-900 mb-3">
+        {symbol} Price Chart
+      </h3>
+      
       <Plot
         data={[
           {
@@ -157,8 +152,13 @@ export default function CandlestickChart({
         }}
         style={{ width: "100%" }}
       />
+    </div>
 
       {/* CONFIDENCE CARDS */}
+    <div>
+      <h3 className="text-lg font-semibold text-gray-900 mb-3">
+        Signal Confidence Overview
+      </h3>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <ConfidenceGauge
           title=" Signal Confidence"
@@ -183,12 +183,17 @@ export default function CandlestickChart({
           bias={confluence.bias}
         />
       </div>
+    </div>
 
       {/* WHY THIS SIGNAL */}
       <div>
-        <h3 className="text-lg font-semibold text-black mb-2">
-          Why this signal?
-        </h3>
+      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+        Why this signal exists
+      </h3>
+      <p className="text-sm text-gray-600 mb-3">
+        Each score is derived from independent technical factors to reduce bias
+        and overfitting.
+      </p>
 
         <ConfidenceBreakdown
           breakdown={{
@@ -201,7 +206,7 @@ export default function CandlestickChart({
         />
       </div>
 
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <TechnicalSnapshot
           symbol={symbol}
           close={bars[bars.length - 1].close}
