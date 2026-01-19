@@ -4,7 +4,7 @@ type Props = {
   title: string;
   subtitle: string;
   score: number;
-  bias: "Bullish" | "Bearish" | "Neutral";
+  bias: "Bullish" | "Bearish" | "Neutral" | "Neutral to Bullish"| "Neutral to Bearish";
 };
 
 export default function ConfidenceGauge({

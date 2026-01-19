@@ -161,7 +161,7 @@ export default function CandlestickChart({
       {/* CONFIDENCE CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <ConfidenceGauge
-          title="Daily Signal Confidence"
+          title=" Signal Confidence"
           subtitle="Based on selected timeframe"
           score={daily.score}
           bias={daily.bias}

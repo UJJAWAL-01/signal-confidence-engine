@@ -1,7 +1,7 @@
 type Props = {
   label: string;
   score: number;
-  bias: "Bullish" | "Neutral" | "Bearish";
+  bias: "Bullish" | "Neutral" | "Bearish" | "Neutral to Bullish"| "Neutral to Bearish";
 };
 
 export default function ConfidenceSummary({

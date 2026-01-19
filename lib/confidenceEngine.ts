@@ -8,7 +8,7 @@ type Bar = {
   volume: number;
 };
 
-export type ConfidenceBias = "Bullish" | "Neutral" | "Bearish";
+export type ConfidenceBias = "Bullish" | "Neutral" | "Bearish" | "Neutral to Bullish"| "Neutral to Bearish";
 
 export type Breakdown = {
   trend: number;
@@ -17,6 +17,11 @@ export type Breakdown = {
   fibonacci: number;
 };
 
+export type score = {
+  score: number;
+  bias: ConfidenceBias;
+  reasons: string[];
+};
 
 type Params = {
   closes: number[];
@@ -153,8 +158,11 @@ export function computeConfidence({
      FINAL BIAS
      =========================== */
   let bias: ConfidenceBias = "Neutral";
-  if (score >= 65) bias = "Bullish";
-  else if (score <= 35) bias = "Bearish";
+  if (score >= 75) bias = "Bullish";
+  else if (score <= 45) bias = "Bearish";
+  else if (score <= 74) bias = "Neutral to Bullish";
+  else if (score >= 46) bias = "Neutral to Bearish";
+  
 
   return {
     score: Math.round(score),
