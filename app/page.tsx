@@ -73,6 +73,9 @@ export default function Page() {
         >
           {loading ? "Loading…" : "Analyze"}
         </button>
+        <div className="text-xs text-gray-500 max-w-md">
+          This app accpets only the official stock code as input (e.g. AAPL, MSFT, NVDA).
+        </div>
 
         <div className="text-xs text-gray-500 max-w-md">
           Timeframe controls price structure & signal sensitivity.
