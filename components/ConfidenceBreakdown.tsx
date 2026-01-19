@@ -4,13 +4,14 @@ type Breakdown = {
 };
 
 type Props = {
+  
   breakdown: Breakdown;
   reasons: string[];
 };
 
 export default function ConfidenceBreakdown({
   breakdown,
-  reasons,
+  reasons
 }: Props) {
   return (
     <div className="bg-white p-4 rounded shadow text-black">

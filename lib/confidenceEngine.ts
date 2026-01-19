@@ -17,7 +17,9 @@ export type Breakdown = {
   fibonacci: number;
 };
 
+
 type Params = {
+  closes: number[];
   bars: Bar[];
   sma50: (number | null)[];
   sma200: (number | null)[];
@@ -26,6 +28,7 @@ type Params = {
 
 export function computeConfidence({
   bars,
+  closes,
   sma50,
   sma200,
   rsi14,

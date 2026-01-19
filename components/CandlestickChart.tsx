@@ -71,7 +71,7 @@ export default function CandlestickChart({
   const dates = bars.map((b) => b.date);
 
 
-  const confluence = computeConfluence(daily, weekly);
+  const confluence = computeConfluence(daily, daily);
 
   return (
     <div className="space-y-8">
@@ -193,9 +193,9 @@ export default function CandlestickChart({
         <ConfidenceBreakdown
           breakdown={{
             ...daily.breakdown,
-            volume: "volume" in daily.breakdown ? daily.breakdown.volume : 0,
-            breakout: (daily.breakdown as any).breakout || 0, // Cast to 'any' to bypass TypeScript error
-            fibonacci: daily.breakdown.fibonacci || 0,
+            // volume: "volume" in daily.breakdown? daily.breakdown.volume : 0,
+            // breakout: (daily.breakdown as any).breakout || 0, // Cast to 'any' to bypass TypeScript error
+            // fibonacci: daily.breakdown.fibonacci || 0,
           }}
           reasons={daily.reasons}
         />

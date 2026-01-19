@@ -17,8 +17,8 @@ export function simpleMovingAverage(values: number[], period: number): (number |
   return result;
 }
 
-export function rsi(values: number[], period = 14): (number | null)[] {
-  const result: (number | null)[] = [];
+export function rsi(values: number[], period = 14): (number)[] {
+  const result: (number)[] = [];
   let gains = 0;
   let losses = 0;
 
@@ -29,7 +29,7 @@ export function rsi(values: number[], period = 14): (number | null)[] {
       if (diff >= 0) gains += diff;
       else losses -= diff;
 
-      result.push(null);
+      ;
       continue;
     }
 
@@ -46,5 +46,5 @@ export function rsi(values: number[], period = 14): (number | null)[] {
     result.push(Number(rsiValue.toFixed(2)));
   }
 
-  return [null, ...result];
+  return [...result];
 }
