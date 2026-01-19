@@ -1,91 +1,79 @@
-// src/app/api/prices/route.ts
 import { NextResponse } from "next/server";
 
-type Bar = {
-  date: string;
-  open: number;
-  high: number;
-  low: number;
-  close: number;
-  volume: number;
+type YahooBar = {
+  timestamp: number[];
+  indicators: {
+    quote: {
+      open: number[];
+      high: number[];
+      low: number[];
+      close: number[];
+      volume: number[];
+    }[];
+  };
 };
 
-function parseStooqCsv(csvText: string): Bar[] {
-  const lines = csvText.trim().split("\n");
-  if (lines.length < 2) return [];
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const symbol = searchParams.get("symbol");
+  const interval = searchParams.get("interval") || "d";
 
-  // Expected header: Date,Open,High,Low,Close,Volume
-  const bars: Bar[] = [];
-
-  for (let i = 1; i < lines.length; i++) {
-    const row = lines[i].trim();
-    if (!row) continue;
-
-    const parts = row.split(",");
-    if (parts.length < 6) continue;
-
-    const [date, o, h, l, c, v] = parts;
-
-    // Stooq sometimes uses "N/D" for missing
-    if ([o, h, l, c, v].some((x) => x === "N/D")) continue;
-
-    const open = Number(o);
-    const high = Number(h);
-    const low = Number(l);
-    const close = Number(c);
-    const volume = Number(v);
-
-    if (![open, high, low, close, volume].every(Number.isFinite)) continue;
-
-    bars.push({ date, open, high, low, close, volume });
+  if (!symbol) {
+    return NextResponse.json([]);
   }
 
-  return bars;
-}
+  // Map interval
+  const intervalMap: Record<string, string> = {
+    d: "1d",
+    w: "1wk",
+    m: "1mo",
+  };
 
-export async function GET(req: Request) {
-  const url = new URL(req.url);
-  const symbolRaw = (url.searchParams.get("symbol") || "AAPL").trim();
-  const intervalRaw = (url.searchParams.get("interval") || "d").trim().toLowerCase();
-
-  // Stooq symbols for US equities: aapl.us, msft.us, spy.us
-  const symbol = symbolRaw.toLowerCase().endsWith(".us")
-    ? symbolRaw.toLowerCase()
-    : `${symbolRaw.toLowerCase()}.us`;
-
-  // Stooq intervals: d (daily), w (weekly), m (monthly)
-  const interval = ["d", "w", "m"].includes(intervalRaw) ? intervalRaw : "d";
-
-  const stooqUrl = `https://stooq.com/q/d/l/?s=${encodeURIComponent(symbol)}&i=${encodeURIComponent(interval)}`;
+  const yahooInterval = intervalMap[interval] || "1d";
 
   try {
-    const resp = await fetch(stooqUrl, {
-      // Avoid caching during dev; later we can tune caching for production
-      cache: "no-store",
-    });
-
-    if (!resp.ok) {
-      return NextResponse.json(
-        { ok: false, error: `Data fetch failed (${resp.status})`, symbol, interval },
-        { status: 502 }
-      );
-    }
-
-    const csvText = await resp.text();
-    const bars = parseStooqCsv(csvText);
-
-    if (bars.length === 0) {
-      return NextResponse.json(
-        { ok: false, error: "No bars returned (invalid symbol or empty dataset).", symbol, interval },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({ ok: true, symbol, interval, bars });
-  } catch (err: any) {
-    return NextResponse.json(
-      { ok: false, error: err?.message || "Unknown error", symbol, interval },
-      { status: 500 }
+    const res = await fetch(
+      `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=${yahooInterval}&range=2y`,
+      {
+        headers: {
+          "User-Agent": "Mozilla/5.0",
+        },
+        cache: "no-store",
+      }
     );
+
+    if (!res.ok) {
+      throw new Error("Yahoo price fetch failed");
+    }
+
+    const data = await res.json();
+
+    const result = data.chart?.result?.[0];
+    if (!result) {
+      return NextResponse.json([]);
+    }
+
+    const quote = result.indicators.quote[0];
+    const timestamps = result.timestamp;
+
+    const bars = timestamps.map((t: number, i: number) => ({
+      date: new Date(t * 1000).toISOString().slice(0, 10),
+      open: quote.open[i],
+      high: quote.high[i],
+      low: quote.low[i],
+      close: quote.close[i],
+      volume: quote.volume[i],
+    })).filter(
+      (b: any) =>
+        b.open != null &&
+        b.high != null &&
+        b.low != null &&
+        b.close != null
+    );
+
+    return NextResponse.json(bars);
+  } catch (error) {
+    console.error("API /prices error:", error);
+    return NextResponse.json([]);
   }
 }

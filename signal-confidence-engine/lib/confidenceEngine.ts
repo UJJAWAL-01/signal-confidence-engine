@@ -1,21 +1,4 @@
-// src/lib/confidenceEngine.ts
-import { computeFibPivots } from "./fibPivots";
-export type MarketBias = "Bullish" | "Bearish" | "Neutral";
-
-export type ConfidenceBreakdown = {
-  trend: number;
-  momentum: number;
-  volume: number;
-  breakout: number;
-  fibonacci: number;
-};
-
-export type ConfidenceResult = {
-  score: number;
-  bias: MarketBias;
-  breakdown: ConfidenceBreakdown;
-  reasons: string[];
-};
+import { fibonacciPivots } from "./fibonacci";
 
 type Bar = {
   open: number;
@@ -25,11 +8,20 @@ type Bar = {
   volume: number;
 };
 
-type ConfidenceInput = {
+export type ConfidenceBias = "Bullish" | "Neutral" | "Bearish";
+
+export type Breakdown = {
+  trend: number;
+  momentum: number;
+  volume: number;
+  fibonacci: number;
+};
+
+type Params = {
   bars: Bar[];
   sma50: (number | null)[];
   sma200: (number | null)[];
-  rsi14: (number | null)[];
+  rsi14: number[];
 };
 
 export function computeConfidence({
@@ -37,108 +29,134 @@ export function computeConfidence({
   sma50,
   sma200,
   rsi14,
-}: ConfidenceInput) {
-  const reasons: string[] = [];
-
-  let trend = 0;
-  let momentum = 0;
-  let breakout = 0;
-  let volume = 0;
-  let fibonacci = 0;
-
-  const lastIndex = bars.length - 1;
-  const lastClose = bars[lastIndex]?.close;
-
-  if (!lastClose) {
+}: Params) {
+  const last = bars.at(-1);
+  if (!last) {
     return {
       score: 0,
-      bias: "Neutral",
-      breakdown: {},
+      bias: "Neutral" as ConfidenceBias,
+      breakdown: { trend: 0, momentum: 0, volume: 0, fibonacci: 0 },
       reasons: ["Insufficient data"],
     };
   }
 
-  /* ---------------- TREND (30%) ---------------- */
-  if (sma50[lastIndex] && sma200[lastIndex]) {
-    if (sma50[lastIndex]! > sma200[lastIndex]!) {
-      trend = 30;
-      reasons.push("SMA50 above SMA200 (Bullish trend)");
-    } else {
-      trend = -30;
-      reasons.push("SMA50 below SMA200 (Bearish trend)");
-    }
+  let score = 0;
+  const reasons: string[] = [];
+
+  const breakdown: Breakdown = {
+    trend: 0,
+    momentum: 0,
+    volume: 0,
+    fibonacci: 0,
+  };
+
+  /* ===========================
+     1️⃣ TREND (35%)
+     =========================== */
+  const s50 = sma50.at(-1);
+  const s200 = sma200.at(-1);
+
+  if (s50 && s200) {
+    const trendStrength = ((s50 - s200) / s200) * 100;
+
+    let trendScore = 0;
+    if (trendStrength > 2) trendScore = 35;
+    else if (trendStrength > 0.5) trendScore = 25;
+    else if (trendStrength > -0.5) trendScore = 15;
+    else trendScore = 5;
+
+    breakdown.trend = trendScore;
+    score += trendScore;
+
+    reasons.push(
+      trendScore >= 25
+        ? "Short-term trend is clearly above long-term average"
+        : "Trend is weak or ranging relative to long-term average"
+    );
   }
 
-  /* ---------------- MOMENTUM (20%) ---------------- */
-  if (rsi14[lastIndex]) {
-    const rsi = rsi14[lastIndex]!;
-    if (rsi > 55 && rsi < 70) {
-      momentum = 20;
-      reasons.push(`RSI healthy at ${rsi.toFixed(1)}`);
-    } else if (rsi >= 70) {
-      momentum = -10;
-      reasons.push(`RSI overbought at ${rsi.toFixed(1)}`);
-    } else if (rsi < 45) {
-      momentum = -20;
-      reasons.push(`RSI weak at ${rsi.toFixed(1)}`);
-    }
-  }
+  /* ===========================
+     2️⃣ MOMENTUM – RSI (25%)
+     =========================== */
+  const rsi = rsi14.at(-1) ?? 50;
+  let rsiScore = 0;
 
-  /* ---------------- BREAKOUT (15%) ---------------- */
-  const recentHigh = Math.max(...bars.slice(-20).map(b => b.high));
-  if (lastClose > recentHigh * 0.995) {
-    breakout = 15;
-    reasons.push("Price near recent high (Breakout attempt)");
-  }
+  if (rsi > 60 && rsi < 70) rsiScore = 25;
+  else if (rsi >= 50) rsiScore = 18;
+  else if (rsi >= 40) rsiScore = 12;
+  else rsiScore = 5;
 
-  /* ---------------- VOLUME (15%) ---------------- */
+  breakdown.momentum = rsiScore;
+  score += rsiScore;
+
+  reasons.push(
+    rsiScore >= 18
+      ? "Momentum supports continuation"
+      : "Momentum is neutral or weakening"
+  );
+
+  /* ===========================
+     3️⃣ VOLUME (20%)
+     =========================== */
+  const recentVolumes = bars.slice(-20).map((b) => b.volume);
   const avgVolume =
-    bars.slice(-20).reduce((a, b) => a + b.volume, 0) / 20;
-  if (bars[lastIndex].volume > avgVolume * 1.2) {
-    volume = 15;
-    reasons.push("Volume expansion confirms move");
-  }
+    recentVolumes.reduce((a, b) => a + b, 0) / recentVolumes.length;
 
-  /* ---------------- FIBONACCI PIVOT (20%) ---------------- */
-  const prevBar = bars[lastIndex - 1];
-  if (prevBar) {
-    const pivot =
-      (prevBar.high + prevBar.low + prevBar.close) / 3;
-    const r1 =
-      pivot + (prevBar.high - prevBar.low) * 0.382;
-    const s1 =
-      pivot - (prevBar.high - prevBar.low) * 0.382;
+  const volRatio = last.volume / avgVolume;
 
-    if (lastClose > pivot && lastClose < r1) {
-      fibonacci = 20;
-      reasons.push("Price holding above Fibonacci pivot");
-    } else if (lastClose < pivot && lastClose > s1) {
-      fibonacci = -10;
-      reasons.push("Price rejected near Fibonacci pivot");
-    }
-  }
+  let volumeScore = 0;
+  if (volRatio >= 1.5) volumeScore = 20;
+  else if (volRatio >= 1.2) volumeScore = 14;
+  else if (volRatio >= 1.0) volumeScore = 8;
+  else volumeScore = 4;
 
-  /* ---------------- FINAL SCORE ---------------- */
-  let score =
-    50 + trend + momentum + breakout + volume + fibonacci;
+  breakdown.volume = volumeScore;
+  score += volumeScore;
 
-  score = Math.max(0, Math.min(100, score));
+  reasons.push(
+    volumeScore >= 14
+      ? "Above-average volume confirms participation"
+      : "Volume participation is average or low"
+  );
 
-  let bias: MarketBias = "Neutral";
-if (score >= 65) bias = "Bullish";
-else if (score <= 35) bias = "Bearish";
+  /* ===========================
+     4️⃣ FIBONACCI PIVOTS (20%)
+     =========================== */
+  const pivots = fibonacciPivots(
+    bars.slice(-2)[0].close, // Extract the 'close' property from the Bar object
+    bars.slice(-3)[0].close, // Extract the 'close' property from the Bar object
+    bars.slice(-4)[0].close  // Extract the 'close' property from the Bar object
+  );
 
+  const distanceFromPP =
+    ((last.close - pivots.pp) / pivots.pp) * 100;
+
+  let fibScore = 0;
+  if (distanceFromPP > 1) fibScore = 20;
+  else if (distanceFromPP > 0) fibScore = 14;
+  else if (distanceFromPP > -1) fibScore = 8;
+  else fibScore = 4;
+
+  breakdown.fibonacci = fibScore;
+  score += fibScore;
+
+  reasons.push(
+    fibScore >= 14
+      ? "Price is holding above key Fibonacci structure"
+      : "Price is near or below Fibonacci pivot"
+  );
+
+  /* ===========================
+     FINAL BIAS
+     =========================== */
+  let bias: ConfidenceBias = "Neutral";
+  if (score >= 65) bias = "Bullish";
+  else if (score <= 35) bias = "Bearish";
 
   return {
-    score,
+    score: Math.round(score),
     bias,
-    breakdown: {
-      trend,
-      momentum,
-      breakout,
-      volume,
-      fibonacci,
-    },
+    breakdown,
     reasons,
   };
 }
