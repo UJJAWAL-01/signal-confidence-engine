@@ -162,11 +162,13 @@ export default function DeepAnalysisTab({ dailyBars, weeklyBars, monthlyBars, ma
           <Zap className="w-6 h-6 text-yellow-500" />
           <h3 className={`text-xl font-bold ${textPrimary}`}>Market Microstructure</h3>
           <div className={`ml-auto px-4 py-2 rounded-lg border ${getScoreBg(analysis.marketMicrostructure.score)}`}>
-            <span className={`text-2xl font-bold ${getScoreColor(analysis.marketMicrostructure.score)}`}>
-              {analysis.marketMicrostructure.score}
-            </span>
+            <div className={`text-2xl font-bold ${getScoreColor(analysis.marketMicrostructure?.score || 0)}`}>
+              {analysis.marketMicrostructure?.priceImpact || 'N/A'}
+            </div>
           </div>
         </div>
+        
+        
 
         <p className={`text-sm ${textMuted} mb-4`}>
           <strong>What it measures:</strong> Market microstructure examines the mechanics of how trades are executed, including bid-ask spreads, market depth, and price impact. This helps assess trading costs and market efficiency.
@@ -205,11 +207,21 @@ export default function DeepAnalysisTab({ dailyBars, weeklyBars, monthlyBars, ma
         <div className="flex items-center gap-3 mb-4">
           <Target className="w-6 h-6 text-purple-500" />
           <h3 className={`text-xl font-bold ${textPrimary}`}>Market Regime Detection</h3>
-          <div className={`ml-auto px-4 py-2 rounded-lg border ${isDark ? 'bg-purple-500/20 border-purple-500/30' : 'bg-purple-100 border-purple-300'}`}>
-            <span className={`text-lg font-bold ${isDark ? 'text-purple-400' : 'text-purple-700'}`}>
-              {analysis.regimeDetection.currentRegime}
-            </span>
-          </div>
+          <div
+  className={`ml-auto inline-flex items-center px-3 py-1.5 rounded-md border 
+  ${isDark 
+    ? 'bg-purple-500/20 border-purple-500/30' 
+    : 'bg-purple-100 border-purple-300'
+  }`}
+>
+  <span
+    className={`text-sm font-semibold tracking-wide leading-none text-center
+    ${isDark ? 'text-purple-400' : 'text-purple-700'}`}
+  >
+    {analysis.regimeDetection.currentRegime}
+  </span>
+</div>
+
         </div>
 
         <p className={`text-sm ${textMuted} mb-4`}>

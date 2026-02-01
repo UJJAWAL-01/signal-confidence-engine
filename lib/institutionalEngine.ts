@@ -12,6 +12,36 @@ export type Bar = {
   volume: number;
 };
 
+
+// Get appropriate market benchmark based on symbol
+export function getMarketBenchmark(symbol: string): string {
+  if (symbol.endsWith('.NS') || symbol.endsWith('.BO')) {
+    return '^NSEI'; // NIFTY 50
+  }
+  if (symbol.endsWith('.T')) {
+    return '^N225'; // NIKKEI 225
+  }
+  if (symbol.endsWith('.L')) {
+    return '^FTSE'; // FTSE 100
+  }
+  if (symbol.endsWith('.DE')) {
+    return '^GDAXI'; // DAX
+  }
+  if (symbol.endsWith('.PA')) {
+    return '^FCHI'; // CAC 40
+  }
+  if (symbol.endsWith('.HK')) {
+    return '^HSI'; // Hang Seng
+  }
+  if (symbol.endsWith('.AX')) {
+    return '^AXJO'; // ASX 200
+  }
+  if (symbol.endsWith('.TO')) {
+    return '^GSPTSE'; // TSX
+  }
+  return 'SPY'; // Default to S&P 500
+}
+
 export type InstitutionalSignal = {
   symbol: string;
   price: number;
@@ -337,6 +367,7 @@ export function computeInstitutionalSignal(
   monthlyBars: Bar[],
   marketBars: Bar[] // SPY or market index for beta calculation
 ): InstitutionalSignal {
+  const benchmarkData = marketBars.length > 0 ? marketBars : dailyBars;
   
   const closes = dailyBars.map(b => b.close);
   const currentPrice = closes[closes.length - 1];
@@ -471,6 +502,7 @@ export function computeInstitutionalSignal(
   const positionSize = (maxLoss / stopLossDistance) * currentPrice;
   const positionSizePercent = (positionSize / accountSize) * 100;
   
+  
   // ============================================
   // RETURN RESULT
   // ============================================
@@ -542,7 +574,7 @@ export function computeInstitutionalSignal(
       },
       riskReward: Number(riskReward.toFixed(1)),
       positionSize: `${positionSizePercent.toFixed(1)}% of portfolio`,
-      maxLoss: `$${maxLoss.toFixed(0)} per $10k account`
+      maxLoss: `${maxLoss.toFixed(0)} per 10k account`
     },
     
     layers: {}, // Will be filled with detailed breakdown
