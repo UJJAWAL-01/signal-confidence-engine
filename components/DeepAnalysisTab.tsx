@@ -104,10 +104,12 @@ export default function DeepAnalysisTab({ dailyBars, weeklyBars, monthlyBars, ma
       <div className={`${bgSecondary} rounded-xl ${border} border p-6`}>
         <div className="flex items-center gap-3 mb-4">
           <Activity className="w-6 h-6 text-emerald-500" />
+          <div className="flex items-center gap-2 mb-2">
           <h3 className={`text-xl font-bold ${textPrimary}`}>Order Flow Analysis</h3>
             <Tooltip content="What it measures: Order flow analysis examines buying and selling pressure by analyzing volume-weighted prices, order imbalances, and cumulative delta to identify patterns.">
               <HelpCircle className={`w-3 h-6 ${textMuted} cursor-help`} />
             </Tooltip>
+          </div>
           <div className={`ml-auto px-4 py-2 rounded-lg border ${getScoreBg(analysis.orderFlow.score)}`}>
             <span className={`text-2xl font-bold ${getScoreColor(analysis.orderFlow.score)}`}>
               {analysis.orderFlow.score}
@@ -165,10 +167,12 @@ export default function DeepAnalysisTab({ dailyBars, weeklyBars, monthlyBars, ma
       <div className={`${bgSecondary} rounded-xl ${border} border p-6`}>
         <div className="flex items-center gap-3 mb-4">
           <Zap className="w-6 h-6 text-yellow-500" />
+          <div className="flex items-center gap-2 mb-2">
           <h3 className={`text-xl font-bold ${textPrimary}`}>Market Microstructure</h3>
           <Tooltip content="What it measures: Market microstructure examines the mechanics of how trades are executed, including bid-ask spreads, market depth, and price impact. This helps assess trading costs and market efficiency.">
               <HelpCircle className={`w-3 h-6 ${textMuted} cursor-help`} />
           </Tooltip>
+          </div>
           <div className={`ml-auto px-4 py-2 rounded-lg border ${getScoreBg(analysis.marketMicrostructure.score)}`}>
             <div className={`text-2xl font-bold ${getScoreColor(analysis.marketMicrostructure?.score || 0)}`}>
               {analysis.marketMicrostructure?.priceImpact || 'N/A'}
@@ -207,10 +211,12 @@ export default function DeepAnalysisTab({ dailyBars, weeklyBars, monthlyBars, ma
       <div className={`${bgSecondary} rounded-xl ${border} border p-6`}>
         <div className="flex items-center gap-3 mb-4">
           <Target className="w-6 h-6 text-purple-500" />
+          <div className="flex items-center gap-2 mb-2">
           <h3 className={`text-xl font-bold ${textPrimary}`}>Market Regime Detection</h3>
             <Tooltip content="What it measures: Market regime detection identifies the current market state (trending, mean-reverting, volatile, or quiet) to help you choose the right trading strategy. Different regimes require different approaches.">
               <HelpCircle className={`w-3 h-6 ${textMuted} cursor-help`} />
             </Tooltip>
+            </div>
           <div
   className={`ml-auto inline-flex items-center px-3 py-1.5 rounded-md border 
   ${isDark 
@@ -289,10 +295,12 @@ export default function DeepAnalysisTab({ dailyBars, weeklyBars, monthlyBars, ma
       <div className={`${bgSecondary} rounded-xl ${border} border p-6`}>
         <div className="flex items-center gap-3 mb-4">
           <BarChart3 className="w-6 h-6 text-orange-500" />
+          <div className="flex items-center gap-2 mb-2">
           <h3 className={`text-xl font-bold ${textPrimary}`}>Volatility Surface Analysis</h3>
             <Tooltip content="What it measures: Volatility surface analysis examines realized volatility across different timeframes and compares it to implied volatility. This helps identify mispricings and potential options opportunities.">
               <HelpCircle className={`w-3 h-6 ${textMuted} cursor-help`} />
             </Tooltip>
+            </div>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
           <div className={`${isDark ? 'bg-slate-800/50' : 'bg-gray-50'} rounded-lg p-4`}>
@@ -337,10 +345,12 @@ export default function DeepAnalysisTab({ dailyBars, weeklyBars, monthlyBars, ma
       <div className={`${bgSecondary} rounded-xl ${border} border p-6`}>
         <div className="flex items-center gap-3 mb-4">
           <Users className="w-6 h-6 text-cyan-500" />
+          <div className="flex items-center gap-2 mb-2">
           <h3 className={`text-xl font-bold ${textPrimary}`}>Smart Money Indicators</h3>
             <Tooltip content="What it measures: Smart money indicators track institutional activity using Wyckoff methodology, composite indexes, and volume patterns to identify accumulation or distribution by sophisticated investors.">
               <HelpCircle className={`w-3 h-6 ${textMuted} cursor-help`} />
             </Tooltip>
+            </div>
           <div className={`ml-auto px-4 py-2 rounded-lg border ${getScoreBg(analysis.smartMoneyIndicators.score)}`}>
             <span className={`text-2xl font-bold ${getScoreColor(analysis.smartMoneyIndicators.score)}`}>
               {analysis.smartMoneyIndicators.score}
@@ -393,10 +403,12 @@ export default function DeepAnalysisTab({ dailyBars, weeklyBars, monthlyBars, ma
         <div className={`${bgSecondary} rounded-xl ${border} border p-6`}>
           <div className="flex items-center gap-3 mb-4">
             <Shield className="w-6 h-6 text-teal-500" />
+            <div className="flex items-center gap-2 mb-2">
             <h3 className={`text-lg font-bold ${textPrimary}`}>Liquidity Analysis</h3>
               <Tooltip content="Liquidity measures how easily you can enter/exit positions without moving price significantly.">
                 <HelpCircle className={`w-3 h-6 ${textMuted} cursor-help`} />
               </Tooltip>
+              </div>
             <div className={`ml-auto px-3 py-1 rounded-lg border ${getScoreBg(analysis.liquidityAnalysis.score)}`}>
               <span className={`text-xl font-bold ${getScoreColor(analysis.liquidityAnalysis.score)}`}>
                 {analysis.liquidityAnalysis.score}
@@ -438,10 +450,12 @@ export default function DeepAnalysisTab({ dailyBars, weeklyBars, monthlyBars, ma
         <div className={`${bgSecondary} rounded-xl ${border} border p-6`}>
           <div className="flex items-center gap-3 mb-4">
             <Activity className="w-6 h-6 text-pink-500" />
+            <div className="flex items-center gap-2 mb-2">
             <h3 className={`text-lg font-bold ${textPrimary}`}>Correlation Analysis</h3>
               <Tooltip content="Correlation analysis assesses how this stock moves in relation to the overall market and its sector. Understanding these relationships aids in portfolio diversification and risk management.">
                 <HelpCircle className={`w-3 h-6 ${textMuted} cursor-help`} />
               </Tooltip>
+              </div>
           </div>
           <div className="space-y-3">
             <div className={`${isDark ? 'bg-slate-800/50' : 'bg-gray-50'} rounded-lg p-4`}>
@@ -485,10 +499,12 @@ export default function DeepAnalysisTab({ dailyBars, weeklyBars, monthlyBars, ma
       <div className={`${bgSecondary} rounded-xl ${border} border p-6`}>
         <div className="flex items-center gap-3 mb-4">
           <Calendar className="w-6 h-6 text-indigo-500" />
+          <div className="flex items-center gap-2 mb-2">
           <h3 className={`text-xl font-bold ${textPrimary}`}>Seasonality Patterns</h3>
             <Tooltip content="Seasonality analysis identifies recurring patterns based on time of week, month, or quarter. These patterns can provide edge when timing entries and exits.">
               <HelpCircle className={`w-3 h-6 ${textMuted} cursor-help`} />
             </Tooltip>
+            </div>
         </div>
         <div className={`${bgTertiary} rounded-lg p-4 mb-4`}>
           <p className={`text-sm ${textSecondary}`}>{analysis.seasonalityPatterns.description}</p>
