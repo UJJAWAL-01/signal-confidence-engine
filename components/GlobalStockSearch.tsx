@@ -24,7 +24,7 @@ export default function GlobalStockSearch({ onSelectStock, isDark = true }: Prop
   
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const searchTimeoutRef = useRef<NodeJS.Timeout>();
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Theme
   const bg = isDark ? 'bg-slate-800' : 'bg-white';
