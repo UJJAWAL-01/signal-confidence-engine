@@ -69,7 +69,7 @@ export default function CompleteTradingDashboard() {
   const [news, setNews] = useState<any[]>([]);
   const [analysis, setAnalysis] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(true);
   const [showDisclaimer, setShowDisclaimer] = useState(true);
   const [activeTab, setActiveTab] = useState('analysis');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
