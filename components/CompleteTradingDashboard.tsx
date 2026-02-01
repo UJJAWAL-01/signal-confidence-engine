@@ -1482,8 +1482,8 @@ const handleSymbolSelect = async (sym: string, name?: string) => {
 
           <div className={`text-center text-xs ${textMuted} pt-6 border-t ${isDark ? 'border-slate-800' : 'border-gray-200'}`}>
             <p>© 2025 Signal Intelligence Platform • Educational Use Only • Not a Registered Investment Advisor</p>
-             <p>Developed by Ujjawal Deepak Patel</p>
             <p className="mt-1">All trading and investing involves risk. You can lose money. Consult a professional before making financial decisions.</p>
+            <p>Developed by Ujjawal Deepak Patel</p>
           </div>
         </div>
       </footer>
