@@ -198,9 +198,9 @@ function analyzeOrderFlow(bars: Bar[]): OrderFlowAnalysis {
   else if (vwapDistance < -1) vwapScore = 30;
   
   components.push({
-    name: 'VWAP Position',
+    name: 'VWMA Position',
     value: vwapScore,
-    description: `Price is ${vwapDistance > 0 ? 'above' : 'below'} VWAP by ${Math.abs(vwapDistance).toFixed(2)}%`,
+    description: `Price is ${vwapDistance > 0 ? 'above' : 'below'} VWMA by ${Math.abs(vwapDistance).toFixed(2)}%`,
     interpretation: vwapDistance > 1 ? 
       'Strong buying pressure - institutional accumulation likely' :
       vwapDistance < -1 ?

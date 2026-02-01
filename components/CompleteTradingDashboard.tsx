@@ -1439,7 +1439,7 @@ const handleSymbolSelect = async (sym: string, name?: string) => {
             <h4 className={`font-bold ${textPrimary} mb-3 text-sm md:text-base`}>⚠️ Important Disclaimer</h4>
             <div className={`text-xs md:text-sm ${textMuted} space-y-2`}>
               <p>
-                <strong>Not Investment Advice:</strong> This platform is an educational tool for technical analysis and statistical forecasting. All information, predictions, scores, and scenarios are provided for informational and educational purposes only.
+                <strong>Not Investment Advice:</strong> This platform is an educational tool for technical analysis and statistical forecasting. All information, predictions, scores, and scenarios are provided for informational and educational purposes only .
               </p>
               <p>
                 <strong>No Professional Relationship:</strong> We are not registered investment advisors, brokers, or financial planners. Use of this tool does not create an advisory relationship. Always consult with a qualified financial professional before making investment decisions.
@@ -1449,6 +1449,7 @@ const handleSymbolSelect = async (sym: string, name?: string) => {
               </p>
             </div>
           </div>
+          
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-6">
             <div>
