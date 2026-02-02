@@ -63,7 +63,10 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ news });
   } catch (error) {
+  // Log only in development
+  if (process.env.NODE_ENV === 'development') {
     console.error('API /news error:', error);
-    return NextResponse.json({ news: [] });
   }
+  return NextResponse.json({ news: [] }, { status: 500 });
+}
 }

@@ -73,6 +73,7 @@ export default function CompleteTradingDashboard() {
   const [showDisclaimer, setShowDisclaimer] = useState(true);
   const [activeTab, setActiveTab] = useState('analysis');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   // NEW: API Search States
   const [apiSearchResults, setApiSearchResults] = useState<SearchResult[]>([]);
@@ -260,6 +261,7 @@ const currency = getCurrency(symbol);
 
   const loadData = async () => {
   setLoading(true);
+  setError(null);
   try {
     const [dailyRes, weeklyRes, monthlyRes, marketRes, newsRes] = await Promise.all([
       fetch(`/api/prices?symbol=${symbol}&interval=d`),
@@ -269,11 +271,19 @@ const currency = getCurrency(symbol);
       fetch(`/api/news?symbol=${symbol}`)
     ]);
 
+    if (!dailyRes.ok) {
+      throw new Error(`Failed to load daily data: ${dailyRes.status}`);
+    }
+
     const daily = await dailyRes.json();
     const weekly = await weeklyRes.json();
     const monthly = await monthlyRes.json();
     const market = await marketRes.json();
     const newsData = await newsRes.json();
+
+    if (!Array.isArray(daily) || daily.length === 0) {
+      throw new Error('No data available for this symbol. Please check the symbol and try again.');
+    }
 
     // NORMALIZE PRICES FOR INDIAN STOCKS
     const normalizeBars = (bars: any[]) => {
@@ -302,8 +312,14 @@ const currency = getCurrency(symbol);
       result.symbol = symbol;
       setAnalysis(result);
     }
-  } catch (error) {
-    console.error('Error loading data:', error);
+  } catch (error: any) {
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error loading data:', error);
+    }
+    setError(error.message || 'Failed to load market data. Please try again.');
+    setWeeklyBars([]);
+    setMonthlyBars([]);
+    setMarketBars([]);
   } finally {
     setLoading(false);
   }
@@ -326,10 +342,13 @@ const currency = getCurrency(symbol);
 // };
 
 const handleSymbolSelect = async (sym: string, name?: string) => {
-  console.log(' handleSymbolSelect called with:', sym);
+
+  if (!sym || sym.trim().length === 0) {
+    setError('Please enter a valid symbol');
+    return;
+  }
 
   const actualSymbol = INDEX_MAPPINGS[sym.toUpperCase()] || sym;
-  console.log(' Actual symbol to load:', actualSymbol);
 
   // Immediately update UI
   setSymbol(actualSymbol);
@@ -337,11 +356,11 @@ const handleSymbolSelect = async (sym: string, name?: string) => {
   setShowApiResults(false);
   setShowSuggestions(false);
   setLoading(true);
+  setError(null); 
   
   try {
     // INSTANT LOAD - Fetch all data immediately
     const benchmark = getMarketBenchmark(actualSymbol);
-    console.log(' Benchmark:', benchmark);
 
     const [dailyRes, weeklyRes, monthlyRes, marketRes, newsRes] = await Promise.all([
       fetch(`/api/prices?symbol=${actualSymbol}&interval=d`),
@@ -351,13 +370,19 @@ const handleSymbolSelect = async (sym: string, name?: string) => {
       fetch(`/api/news?symbol=${actualSymbol}`)
     ]);
 
+    if (!dailyRes.ok) {
+      throw new Error(`Symbol "${actualSymbol}" not found. Please verify the symbol.`);
+    }
+
     const daily = await dailyRes.json();
     const weekly = await weeklyRes.json();
     const monthly = await monthlyRes.json();
     const market = await marketRes.json();
     const newsData = await newsRes.json();
 
-    console.log(' Data loaded successfully');
+    if (!Array.isArray(daily) || daily.length === 0) {
+      throw new Error(`No data available for "${actualSymbol}". Please try a different symbol.`);
+    }
 
     const normalizeBars = (bars: any[]) => {
       if (!Array.isArray(bars)) return [];
@@ -492,15 +517,32 @@ const handleSymbolSelect = async (sym: string, name?: string) => {
   const border = isDark ? 'border-slate-700' : 'border-gray-200';
 
   if (loading && !analysis) {
-    return (
-      <div className={`min-h-screen ${bgPrimary} flex items-center justify-center`}>
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className={textSecondary}>Loading market data...</p>
+  return (
+    <div className={`min-h-screen ${bgPrimary} flex items-center justify-center`}>
+      <div className="text-center max-w-md mx-auto px-4">
+        <div className="relative w-20 h-20 mx-auto mb-6">
+          {/* Outer ring */}
+          <div className="absolute inset-0 border-4 border-emerald-500/20 rounded-full"></div>
+          {/* Spinning ring */}
+          <div className="absolute inset-0 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+          {/* Inner pulse */}
+          <div className="absolute inset-2 bg-emerald-500/20 rounded-full animate-pulse"></div>
+        </div>
+        <h3 className={`text-lg font-semibold ${textPrimary} mb-2`}>
+          Analyzing {symbol}
+        </h3>
+        <p className={`text-sm ${textSecondary} mb-4`}>
+          Computing institutional metrics...
+        </p>
+        <div className={`text-xs ${textMuted} space-y-1`}>
+          <p>• Fetching multi-timeframe data</p>
+          <p>• Calculating CAPM models</p>
+          <p>• Analyzing order flow</p>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
   return (
     <div className={`min-h-screen ${bgPrimary}`}>
@@ -560,7 +602,9 @@ const handleSymbolSelect = async (sym: string, name?: string) => {
                     type="text"
                     value={searchTerm}
                     onChange={(e) => {
-                      setSearchTerm(e.target.value.toUpperCase());
+                      const value = e.target.value.toUpperCase();
+                      const sanitized = value.replace(/[^A-Z0-9.]/g, '');
+                      setSearchTerm(sanitized);
                       setShowSuggestions(true);
                     }}
                     onKeyPress={handleKeyPress}
@@ -568,7 +612,8 @@ const handleSymbolSelect = async (sym: string, name?: string) => {
                       setShowSuggestions(true);
                       if (apiSearchResults.length > 0) setShowApiResults(true);
                     }}
-                    placeholder="Search stocks globally... (e.g., AAPL, RELIANCE.NS, 7203.T)"                    
+                    placeholder="Search stocks globally... (e.g., AAPL, RELIANCE.NS, 7203.T)"  
+                    maxLength={30}                  
                     className={`w-full pl-10 pr-10 py-3 ${bgTertiary} ${border} border rounded-lg ${textPrimary} focus:outline-none focus:ring-2 focus:ring-emerald-500`}
                   />
                   {/* Loading Indicator */}
@@ -897,6 +942,29 @@ const handleSymbolSelect = async (sym: string, name?: string) => {
     Market Scenarios
   </button>
 </div>
+    </div>
+  </div>
+)}
+
+{/* Error Banner - ADD THIS */}
+{error && (
+  <div className={`max-w-[1800px] mx-auto px-4 md:px-6 py-4`}>
+    <div className={`${isDark ? 'bg-red-900/20 border-red-700/30' : 'bg-red-50 border-red-200'} border rounded-lg p-4 flex items-start gap-3`}>
+      <AlertTriangle className={`w-5 h-5 flex-shrink-0 mt-0.5 ${isDark ? 'text-red-400' : 'text-red-600'}`} />
+      <div className="flex-1">
+        <p className={`text-sm font-semibold ${isDark ? 'text-red-200' : 'text-red-800'} mb-1`}>
+          Unable to Load Data
+        </p>
+        <p className={`text-xs ${isDark ? 'text-red-300' : 'text-red-700'}`}>
+          {error}
+        </p>
+      </div>
+      <button 
+        onClick={() => setError(null)}
+        className={`p-1 hover:${isDark ? 'bg-red-800/30' : 'bg-red-100'} rounded`}
+      >
+        <X className={`w-4 h-4 ${isDark ? 'text-red-400' : 'text-red-600'}`} />
+      </button>
     </div>
   </div>
 )}
@@ -1490,4 +1558,9 @@ const handleSymbolSelect = async (sym: string, name?: string) => {
       </footer>
     </div>
   );
+}
+
+function setError(message: string) {
+  console.error(message);
+  alert(message); // Display an alert to the user
 }

@@ -367,6 +367,15 @@ export function computeInstitutionalSignal(
   monthlyBars: Bar[],
   marketBars: Bar[] // SPY or market index for beta calculation
 ): InstitutionalSignal {
+  if (!dailyBars || dailyBars.length < 10) {
+    throw new Error('Insufficient daily data (need at least 60 bars)');
+  }
+  if (!weeklyBars || weeklyBars.length < 20) {
+    throw new Error('Insufficient weekly data (need at least 20 bars)');
+  }
+  if (!monthlyBars || monthlyBars.length < 12) {
+    throw new Error('Insufficient monthly data (need at least 12 bars)');
+  }
   const benchmarkData = marketBars.length > 0 ? marketBars : dailyBars;
   
   const closes = dailyBars.map(b => b.close);

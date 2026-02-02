@@ -37,10 +37,12 @@ export default function StockNews({ symbol }: Props) {
         const data = JSON.parse(text);
         setNews(data.news || []);
       } catch (err) {
-        console.error("Client news error:", err);
-        setError("News temporarily unavailable");
-        setNews([]);
-      } finally {
+  if (process.env.NODE_ENV === 'development') {
+    console.error("Client news error:", err);
+  }
+  setError("News temporarily unavailable");
+  setNews([]);
+} finally {
         setLoading(false);
       }
     }

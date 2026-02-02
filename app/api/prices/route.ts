@@ -65,25 +65,31 @@ export async function GET(req: Request) {
 );
 
     if (!res.ok) {
-      console.error(`Yahoo Finance API error: ${res.status} ${res.statusText}`);
-      return NextResponse.json([]);
-    }
+  if (process.env.NODE_ENV === 'development') {
+    console.error(`Yahoo Finance API error: ${res.status} ${res.statusText}`);
+  }
+  return NextResponse.json({ error: 'Failed to fetch data' }, { status: res.status });
+}
 
     const data = await res.json();
 
     const result = data.chart?.result?.[0];
     if (!result) {
-      console.error("No result data from Yahoo Finance");
-      return NextResponse.json([]);
-    }
+  if (process.env.NODE_ENV === 'development') {
+    console.error("No result data from Yahoo Finance");
+  }
+  return NextResponse.json({ error: 'No data available' }, { status: 404 });
+}
 
     const quote = result.indicators.quote[0];
     const timestamps = result.timestamp;
 
     if (!timestamps || !quote) {
-      console.error("Missing timestamps or quote data");
-      return NextResponse.json([]);
-    }
+  if (process.env.NODE_ENV === 'development') {
+    console.error("Missing timestamps or quote data");
+  }
+  return NextResponse.json({ error: 'Invalid data format' }, { status: 500 });
+}
 
     // Transform bars to our format
     const bars: TransformedBar[] = timestamps
@@ -108,7 +114,9 @@ export async function GET(req: Request) {
     return NextResponse.json(bars);
     
   } catch (error) {
+  if (process.env.NODE_ENV === 'development') {
     console.error("API /prices error:", error);
-    return NextResponse.json([]);
   }
+  return NextResponse.json({ error: 'Server error' }, { status: 500 });
+}
 }

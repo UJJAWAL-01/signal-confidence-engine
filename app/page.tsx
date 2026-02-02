@@ -34,7 +34,9 @@ export default function Page() {
         fetch(`/api/prices?symbol=SPY&interval=d`)
       ]);
 
-      if (!dailyRes.ok) throw new Error("Failed to fetch data");
+      if (!dailyRes.ok){ 
+        throw new Error("Failed to fetch data");
+      }
 
       const dailyData = await dailyRes.json();
       const weeklyData = await weeklyRes.json();
@@ -51,10 +53,12 @@ export default function Page() {
       setMarketBars(marketData);
 
     } catch (err: any) {
-      console.error("Error:", err);
-      setError(err.message || "Failed to load data");
-      setBars([]);
-    } finally {
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error:', err);
+    }
+    setError(err.message || 'Failed to load data. Please try again.');
+    setBars([]);
+  } finally {
       setLoading(false);
     }
   }

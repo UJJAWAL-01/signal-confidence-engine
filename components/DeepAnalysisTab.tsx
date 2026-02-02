@@ -28,8 +28,11 @@ export default function DeepAnalysisTab({ dailyBars, weeklyBars, monthlyBars, ma
         const result = computeAdvancedInstitutionalAnalysis(dailyBars, weeklyBars, monthlyBars, marketBars);
         setAnalysis(result);
       } catch (error) {
-        console.error('Analysis error:', error);
-      } finally {
+  if (process.env.NODE_ENV === 'development') {
+    console.error('Analysis error:', error);
+  }
+  // Component will show "Unable to compute analysis" message
+} finally {
         setLoading(false);
       }
     }
@@ -85,7 +88,7 @@ export default function DeepAnalysisTab({ dailyBars, weeklyBars, monthlyBars, ma
           <div>
           <div className="flex items-center gap-2 mb-2">
             <h3 className={`text-lg font-bold ${textPrimary} mb-2`}>
-              In-Depth Technical Analysis
+              Technical Analysis
             </h3>
             <Tooltip content="This section provides  quantitative analysis using  metrics typically employed by professionals. Each metric has been carefully selected to provide actionable insights into market dynamics, order flow, and price behavior.">
                 <HelpCircle className={`w-3 h-6 ${textMuted} cursor-help`} />
@@ -410,7 +413,7 @@ export default function DeepAnalysisTab({ dailyBars, weeklyBars, monthlyBars, ma
               </Tooltip>
               </div>
             <div className={`ml-auto px-3 py-1 rounded-lg border ${getScoreBg(analysis.liquidityAnalysis.score)}`}>
-              <span className={`text-xl font-bold ${getScoreColor(analysis.liquidityAnalysis.score)}`}>
+              <span className={`text-xl font-bold ${getScoreColor(analysis.liquidityAnalysis.score).toString()}`}>
                 {analysis.liquidityAnalysis.score}
               </span>
             </div>

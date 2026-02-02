@@ -48,10 +48,12 @@ export async function GET(req: Request) {
     });
 
   } catch (error) {
+  if (process.env.NODE_ENV === 'development') {
     console.error('Search API error:', error);
-    return NextResponse.json({ 
-      error: 'Search failed',
-      results: [] 
-    }, { status: 500 });
   }
+  return NextResponse.json({ 
+    error: 'Search failed',
+    results: [] 
+  }, { status: 500 });
+}
 }
