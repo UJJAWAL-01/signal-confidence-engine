@@ -579,7 +579,7 @@ const handleSymbolSelect = async (sym: string, name?: string) => {
               </div>
               <div>
                 <h1 className={`text-sm md:text-base font-bold ${textPrimary}`}>
-                  <span className="hidden sm:inline">Signal Intelligence Platform</span>
+                  <span className="hidden sm:inline">SignalStack</span>
                   <span className="sm:hidden flex items-center gap-1">
                     <span className="text-lg">{getFlag(symbol)}</span>
                     {symbol}
@@ -1550,7 +1550,7 @@ const handleSymbolSelect = async (sym: string, name?: string) => {
           </div>
 
           <div className={`text-center text-xs ${textMuted} pt-6 border-t ${isDark ? 'border-slate-800' : 'border-gray-200'}`}>
-            <p>© 2025 Signal Intelligence Platform • Educational Use Only • Not a Registered Investment Advisor</p>
+            <p>© 2025 SignalStack • Educational Use Only • Not a Registered Investment Advisor</p>
             <p className="mt-1">All trading and investing involves risk. You can lose money. Consult a professional before making financial decisions.</p>
             <p>Developed by Ujjawal Deepak Patel</p>
           </div>

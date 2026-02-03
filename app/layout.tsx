@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Signal Intelligence Platform - Technical Analysis",
+  title: "SignalStack - Technical Analysis",
   description: "Technical analysis platform with indicators, statistical forecasting, and comprehensive market intelligence for informed analysis",
   keywords: ["technical analysis", "trading", "stock market", "institutional analysis", "quantitative trading"],
   authors: [{ name: "Signal Intelligence Team" }],
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     ],
   },
   openGraph: {
-    title: "Signal Intelligence Platform",
+    title: "SignalStack - Technical Analysis",
     description: "Technical analysis platform with indicators, statistical forecasting, and market intelligence for informed analysis",
     type: "website",
   },
